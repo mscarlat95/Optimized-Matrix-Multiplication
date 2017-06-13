@@ -1,0 +1,104 @@
+Scarlat Marius-George
+332CA
+
+				Tema 2 ASC
+
+	1. Detalii pentru testare
+- Trebuie sa existe in aceasi director cu executabilul urmatoarele:
+	- directorul /out
+	- directorul /input
+	- fisierul tema2.cfg
+- Folosesc in continuare Makefile-ul oferit, cu mici modificari
+
+- Testarea s-a facut pe fep.grid.pub.ro utilizand coada campus-haswell.q
+(timpul de rulare : aprox 2.30 min, iar local s-a obtinut cca. 2.50min)
+
+	2. Detalii de implementare
+- mentionez ca am urmat codul scris in solver.py si l-am reprodus in C
+- tratez cele 4 cazuri de inmultiri : N N, N T, T N, T T la fel ca in solver.py
+
+	3. Optimizari:
+
+a. Alocare de memorie
+- aloc memorie doar la inceput pentru array-uri intrucat se ruleaza toate
+testele laolalta, nu separat
+
+b. Accesul la memorie:
+- folosesc array 1D in loc de matrici pentru accesul mai rapid la continut
+- folosesc registre pentru stocare (insumarea elementelor la inmultirea 
+de matrici)
+- reordonarea buclelor (la fel ca in solver.py)
+
+c. Citirea:
+- salvez intregul continut al fisierului de intrare intr-un buffer folosind
+fread, urmand ca bufferul sa fie parsat cu strtok
+- evit apeluri de sistem, folosind functia atof(token) in loc de sscanf
+
+Observatie: 
+- fac inmultirea matricilor cu alpha si beta de la citire pentru a evita
+parcurgerea suplimentara a acestora la obtinerea lui C 
+
+c. Inmultirea matricilor
+- sparg matricile in blocuri de matrici (block size = 32) pentru cat mai putine
+cache miss-uri
+
+	4. Flag-uri utilizate pentru gcc
+a. ftree-vectorize:	
+- face implicit enable la flag-ul de vectorizare
+(compilerul va detecta instructiunile ce pot fi executate intr-o singura
+instructiune SIMD) 
+- vectorizarea se va executa pe arbori ==> creste performanta
+
+b. funroll-loops:
+- pentru eliminarea numarului de iteratii dintr-o bucla (presupune replicarea 
+continutului acesteia)
+
+c. fexcess-precision=fast: 
+- control asupra preciziei calcului floating-point
+
+	5. Grafice
+- s-au masurat timpul de executie pentru inmultirea matricelor
+la fiecare test in parte
+- s-au testat 2 variante:
+a. neoptimizata (in care am reprodus exact codul din solver.py)
+b. optimizata (in care am spart matricile in blocuri la inmultire)
+Rezultatele aferente pentru a. si b. sunt:
+
+a. Loop order
+functionality_NN:	 2.870000s
+functionality_NT:	 2.770000s
+functionality_TN:	 2.540000s
+functionality_TT:	 1.020000s
+test1:	 16.110000s
+test2:	 68.630000s
+test3:	 157.510000s
+test4:	 314.640000s
+
+b. Loop order + Blocked Matrix Multiplication
+functionality_NN:	 0.890000s
+functionality_NT:	 0.850000s
+functionality_TN:	 0.780000s
+functionality_TT:	 0.740000s
+test1:	 3.500000s
+test2:	 14.080000s
+test3:	 27.960000s
+test4:	 55.870000s
+
+Mentiune:	in grafice testele sunt numerotate de la 1 la 8 (pe Ox),
+			iar pe Oy este evidentiat timpul de executie al fiecaruia
+
+	6. Dificultati
+- obtinerea timpul de executie dorit
+
+	7. Observatii
+- generarea fisierelor de referinta a durat 8h40m
+(consider ca puteau fi uploadate si sa ni se ofere un link de referinta,
+sau se putea oferi un executabil in C/C++ care sa le genereze mult 
+mai rapid)
+
+ 
+	8. Referinte:
+- teorie laborator 5 + solutie laborator 5
+- http://stackoverflow.com/questions/33250700/the-speed-of-fscanf-and-sscanf
+
+
